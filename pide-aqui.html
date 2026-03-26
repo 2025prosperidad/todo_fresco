@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Todo Fresco - Pide Aqui</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,sans-serif;background:#fafaf5;color:#1b1b1b;min-height:100vh;padding-bottom:90px;-webkit-text-size-adjust:100%}
+
+        header{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#fff;padding:1.8rem 1rem 1.2rem;text-align:center}
+        .logo{font-size:2rem;font-weight:800}
+        .sub{font-size:.85rem;opacity:.9;margin-top:2px}
+        .badge{display:inline-block;background:rgba(255,255,255,.2);padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:700;margin-top:10px;letter-spacing:.4px}
+
+        .controls{padding:10px 10px 0;max-width:600px;margin:0 auto}
+        .search{width:100%;padding:10px 14px 10px 38px;border:2px solid #e0e0e0;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23aaa' viewBox='0 0 24 24' width='16'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") 12px center no-repeat}
+        .search:focus{border-color:#40916c}
+
+        .filters{display:flex;gap:6px;padding:10px 0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .filters::-webkit-scrollbar{display:none}
+        .fbtn{padding:7px 16px;border:none;border-radius:18px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;background:#eee;color:#666;font-family:inherit}
+        .fbtn.on{background:#2d6a4f;color:#fff}
+
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 10px;max-width:600px;margin:0 auto}
+
+        .card{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.06);text-align:center;padding:10px 6px;display:flex;flex-direction:column;align-items:center}
+        .card .em{font-size:2.2rem;line-height:1;margin-bottom:4px}
+        .card .nm{font-size:.75rem;font-weight:700;line-height:1.2;margin-bottom:2px}
+        .card .un{font-size:.65rem;color:#888;margin-bottom:6px}
+        .qty{display:flex;align-items:center;gap:0;margin-top:auto}
+        .qb{width:30px;height:28px;border:2px solid #ddd;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;font-family:inherit;-webkit-appearance:none;appearance:none}
+        .qb:first-child{border-radius:8px 0 0 8px}
+        .qb:last-child{border-radius:0 8px 8px 0}
+        .qv{width:30px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;border-top:2px solid #ddd;border-bottom:2px solid #ddd;background:#fff}
+        .qb.hi{border-color:#2d6a4f;color:#2d6a4f}
+        .qv.hi{border-color:#2d6a4f;color:#2d6a4f;background:#d8f3dc}
+
+        .bar{position:fixed;bottom:0;left:0;right:0;background:#2d6a4f;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;transform:translateY(100%);transition:transform .3s;z-index:100;box-shadow:0 -3px 16px rgba(0,0,0,.15)}
+        .bar.vis{transform:translateY(0)}
+        .bar .ct{font-size:.8rem;opacity:.9}
+        .bar .tt{font-size:1.2rem;font-weight:800}
+        .bar button{background:#fff;color:#2d6a4f;border:none;padding:10px 22px;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit}
+
+        .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+        .overlay.show{display:flex}
+        .modal{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:600px;max-height:85vh;padding:1.2rem;overflow-y:auto;animation:su .3s}
+        @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 12px}
+        .modal h2{font-size:1.2rem;margin-bottom:10px}
+        .mi{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:.85rem}
+        .mi .mn{font-weight:600}
+        .mi .md{color:#888;font-size:.78rem}
+        .mi .ms{font-weight:700;color:#2d6a4f}
+        .mt{display:flex;justify-content:space-between;padding:12px 0;font-size:1.1rem;font-weight:800}
+        .fg{margin-bottom:12px}
+        .fg label{display:block;font-size:.78rem;font-weight:600;margin-bottom:4px;color:#888}
+        .fg input,.fg textarea{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:.88rem;font-family:inherit;outline:none}
+        .fg input:focus,.fg textarea:focus{border-color:#40916c}
+        .fg textarea{resize:vertical;min-height:50px}
+        .wa{width:100%;padding:14px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px}
+
+        .empty{text-align:center;padding:2rem;color:#999;grid-column:1/-1}
+
+        @media(min-width:500px){.grid{grid-template-columns:repeat(4,1fr);gap:10px}}
+        @media(min-width:768px){.grid{grid-template-columns:repeat(5,1fr);gap:12px;max-width:800px}.controls{max-width:800px}.card .em{font-size:2.8rem}.card .nm{font-size:.85rem}}
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Todo Fresco</div>
+    <div class="sub">Frutas y Verduras - Local 1082</div>
+    <div class="badge">DOMICILIO GRATIS - TEL 313 537 3374</div>
+</header>
+
+<div class="controls">
+    <input type="text" class="search" placeholder="Buscar producto..." id="src" oninput="render()">
+    <div class="filters" id="fil"></div>
+</div>
+
+<div class="grid" id="gr"></div>
+
+<div class="bar" id="bar">
+    <div>
+        <div class="ct" id="bct">0 productos</div>
+        <div class="tt" id="btt">$0</div>
+    </div>
+    <button onclick="openM()">Pedir por WhatsApp</button>
+</div>
+
+<div class="overlay" id="ov" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal">
+        <div class="handle"></div>
+        <h2>Tu Pedido</h2>
+        <div id="mitems"></div>
+        <div class="mt"><span>Total</span><span id="mtot">$0</span></div>
+        <div class="fg"><label>Tu nombre</label><input type="text" id="cn" placeholder="Ej: Maria Garcia"></div>
+        <div class="fg"><label>Direccion de entrega</label><input type="text" id="ca" placeholder="Ej: Cra 5 #12-34, Barrio Centro"></div>
+        <div class="fg"><label>Notas (opcional)</label><textarea id="cno" placeholder="Ej: Tocar el timbre, maduras, etc."></textarea></div>
+        <button class="wa" onclick="sendWA()">Enviar pedido por WhatsApp</button>
+    </div>
+</div>
+
+<script>
+var P=[
+{n:"Banano",e:"\uD83C\uDF4C",u:"Racimo",c:"frutas"},
+{n:"Manzana Roja",e:"\uD83C\uDF4E",u:"Libra",c:"frutas"},
+{n:"Manzana Verde",e:"\uD83C\uDF4F",u:"Libra",c:"frutas"},
+{n:"Naranja",e:"\uD83C\uDF4A",u:"Libra",c:"frutas"},
+{n:"Limon",e:"\uD83C\uDF4B",u:"Libra",c:"frutas"},
+{n:"Mandarina",e:"\uD83C\uDF4A",u:"Libra",c:"frutas"},
+{n:"Pina",e:"\uD83C\uDF4D",u:"Unidad",c:"frutas"},
+{n:"Sandia",e:"\uD83C\uDF49",u:"Unidad",c:"frutas"},
+{n:"Papaya",e:"\uD83E\uDD6D",u:"Libra",c:"frutas"},
+{n:"Mango",e:"\uD83E\uDD6D",u:"Libra",c:"frutas"},
+{n:"Aguacate",e:"\uD83E\uDD51",u:"Libra",c:"frutas"},
+{n:"Guayaba",e:"\uD83C\uDF48",u:"Libra",c:"frutas"},
+{n:"Mora",e:"\uD83E\uDED0",u:"Libra",c:"frutas"},
+{n:"Fresa",e:"\uD83C\uDF53",u:"Libra",c:"frutas"},
+{n:"Lulo",e:"\uD83D\uDFE0",u:"Libra",c:"frutas"},
+{n:"Maracuya",e:"\uD83D\uDFE1",u:"Libra",c:"frutas"},
+{n:"Tomate de Arbol",e:"\uD83C\uDF45",u:"Libra",c:"frutas"},
+{n:"Granadilla",e:"\uD83D\uDFE0",u:"Libra",c:"frutas"},
+{n:"Uva",e:"\uD83C\uDF47",u:"Libra",c:"frutas"},
+{n:"Melon",e:"\uD83C\uDF48",u:"Unidad",c:"frutas"},
+{n:"Coco",e:"\uD83E\uDD65",u:"Unidad",c:"frutas"},
+{n:"Curuba",e:"\uD83D\uDFE1",u:"Libra",c:"frutas"},
+
+{n:"Tomate",e:"\uD83C\uDF45",u:"Libra",c:"verduras"},
+{n:"Cebolla Cabezona",e:"\uD83E\uDDC5",u:"Libra",c:"verduras"},
+{n:"Cebolla Larga",e:"\uD83E\uDDC5",u:"Atado",c:"verduras"},
+{n:"Pimenton",e:"\uD83E\uDD62",u:"Libra",c:"verduras"},
+{n:"Zanahoria",e:"\uD83E\uDD55",u:"Libra",c:"verduras"},
+{n:"Pepino",e:"\uD83E\uDD52",u:"Libra",c:"verduras"},
+{n:"Lechuga",e:"\uD83E\uDD6C",u:"Unidad",c:"verduras"},
+{n:"Repollo",e:"\uD83E\uDD6C",u:"Unidad",c:"verduras"},
+{n:"Brocoli",e:"\uD83E\uDD66",u:"Libra",c:"verduras"},
+{n:"Coliflor",e:"\uD83E\uDD66",u:"Unidad",c:"verduras"},
+{n:"Espinaca",e:"\uD83E\uDD6C",u:"Atado",c:"verduras"},
+{n:"Habichuela",e:"\uD83E\uDD6C",u:"Libra",c:"verduras"},
+{n:"Arveja",e:"\uD83E\uDD6C",u:"Libra",c:"verduras"},
+{n:"Apio",e:"\uD83E\uDD6C",u:"Atado",c:"verduras"},
+{n:"Mazorca",e:"\uD83C\uDF3D",u:"Unidad",c:"verduras"},
+{n:"Calabacin",e:"\uD83E\uDD52",u:"Libra",c:"verduras"},
+{n:"Ahuyama",e:"\uD83C\uDF83",u:"Libra",c:"verduras"},
+{n:"Acelga",e:"\uD83E\uDD6C",u:"Atado",c:"verduras"},
+{n:"Remolacha",e:"\uD83D\uDFE3",u:"Libra",c:"verduras"},
+
+{n:"Papa Pastusa",e:"\uD83E\uDD54",u:"Libra",c:"tuberculos"},
+{n:"Papa Criolla",e:"\uD83E\uDD54",u:"Libra",c:"tuberculos"},
+{n:"Papa R12",e:"\uD83E\uDD54",u:"Libra",c:"tuberculos"},
+{n:"Yuca",e:"\uD83E\uDD54",u:"Libra",c:"tuberculos"},
+{n:"Platano Verde",e:"\uD83C\uDF4C",u:"Unidad",c:"tuberculos"},
+{n:"Platano Maduro",e:"\uD83C\uDF4C",u:"Unidad",c:"tuberculos"},
+{n:"Arracacha",e:"\uD83E\uDD55",u:"Libra",c:"tuberculos"},
+{n:"Name",e:"\uD83E\uDD54",u:"Libra",c:"tuberculos"},
+
+{n:"Cilantro",e:"\uD83C\uDF3F",u:"Atado",c:"hierbas"},
+{n:"Perejil",e:"\uD83C\uDF3F",u:"Atado",c:"hierbas"},
+{n:"Albahaca",e:"\uD83C\uDF3F",u:"Atado",c:"hierbas"},
+{n:"Tomillo",e:"\uD83C\uDF3F",u:"Atado",c:"hierbas"},
+{n:"Laurel",e:"\uD83C\uDF43",u:"Atado",c:"hierbas"},
+{n:"Oregano Fresco",e:"\uD83C\uDF3F",u:"Atado",c:"hierbas"},
+
+{n:"Ajo",e:"\uD83E\uDDC4",u:"Libra",c:"otros"},
+{n:"Jengibre",e:"\uD83E\uDD55",u:"Libra",c:"otros"},
+{n:"Champinones",e:"\uD83C\uDF44",u:"Bandeja",c:"otros"},
+{n:"Huevos",e:"\uD83E\uDD5A",u:"Panal x30",c:"otros"}
+];
+
+var cart={};
+var fil="todos";
+var cats=["todos","frutas","verduras","tuberculos","hierbas","otros"];
+var catNames=["Todos","Frutas","Verduras","Tuberculos","Hierbas","Otros"];
+
+function init(){
+    var f=document.getElementById("fil");
+    var h="";
+    for(var i=0;i<cats.length;i++){
+        h+='<button class="fbtn'+(i===0?" on":"")+'" onclick="setF(\''+cats[i]+'\',this)">'+catNames[i]+'</button>';
+    }
+    f.innerHTML=h;
+    render();
+}
+
+function render(){
+    var s=document.getElementById("src").value.toLowerCase();
+    var g=document.getElementById("gr");
+    var h="";
+    var count=0;
+
+    for(var i=0;i<P.length;i++){
+        var p=P[i];
+        if(fil!=="todos" && p.c!==fil) continue;
+        if(s && p.n.toLowerCase().indexOf(s)===-1) continue;
+        var q=cart[i]||0;
+        var hi=q>0?" hi":"";
+        h+='<div class="card">';
+        h+='<div class="em">'+p.e+'</div>';
+        h+='<div class="nm">'+p.n+'</div>';
+        h+='<div class="un">'+p.u+'</div>';
+        h+='<div class="qty">';
+        h+='<button class="qb'+hi+'" onclick="chg('+i+',-1)">-</button>';
+        h+='<div class="qv'+hi+'">'+q+'</div>';
+        h+='<button class="qb'+hi+'" onclick="chg('+i+',1)">+</button>';
+        h+='</div></div>';
+        count++;
+    }
+
+    if(count===0) h='<div class="empty">No se encontraron productos</div>';
+    g.innerHTML=h;
+}
+
+function chg(i,d){
+    var c=cart[i]||0;
+    var n=c+d;
+    if(n<0)n=0;
+    if(n===0) delete cart[i];
+    else cart[i]=n;
+    render();
+    updBar();
+}
+
+function updBar(){
+    var bar=document.getElementById("bar");
+    var keys=Object.keys(cart);
+    var items=0;
+    for(var i=0;i<keys.length;i++) items+=cart[keys[i]];
+    document.getElementById("bct").textContent=items+(items===1?" producto":" productos");
+    if(items>0) bar.classList.add("vis");
+    else bar.classList.remove("vis");
+}
+
+function setF(c,btn){
+    fil=c;
+    var btns=document.querySelectorAll(".fbtn");
+    for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
+    btn.classList.add("on");
+    render();
+}
+
+function openM(){
+    var keys=Object.keys(cart);
+    if(keys.length===0) return;
+    var d=document.getElementById("mitems");
+    var h="";
+    for(var i=0;i<keys.length;i++){
+        var k=keys[i];
+        var p=P[k];
+        var q=cart[k];
+        h+='<div class="mi"><div><div class="mn">'+p.e+' '+p.n+'</div>';
+        h+='<div class="md">'+q+' '+p.u+'(s)</div></div></div>';
+    }
+    d.innerHTML=h;
+    document.getElementById("ov").classList.add("show");
+}
+
+function sendWA(){
+    var name=document.getElementById("cn").value.trim();
+    var addr=document.getElementById("ca").value.trim();
+    var notes=document.getElementById("cno").value.trim();
+    if(!name){alert("Por favor ingresa tu nombre");return}
+    if(!addr){alert("Por favor ingresa tu direccion");return}
+
+    var keys=Object.keys(cart);
+    var msg="*NUEVO PEDIDO - TODO FRESCO*\n\n";
+    msg+="*Cliente:* "+name+"\n";
+    msg+="*Direccion:* "+addr+"\n";
+    if(notes) msg+="*Notas:* "+notes+"\n";
+    msg+="\n*PRODUCTOS:*\n\n";
+
+    for(var i=0;i<keys.length;i++){
+        var k=keys[i];
+        var p=P[k];
+        var q=cart[k];
+        msg+=p.e+" "+p.n+" - "+q+" "+p.u+"(s)\n";
+    }
+
+    msg+="\nGracias por tu pedido!";
+
+    var url="https://api.whatsapp.com/send?phone=573143210640&text="+encodeURIComponent(msg);
+    window.open(url,"_blank");
+}
+
+init();
+</script>
+
+</body>
+</html>

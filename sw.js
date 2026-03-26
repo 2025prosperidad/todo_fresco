@@ -1,6 +1,8 @@
-var CACHE="todofresco-v2";
+var CACHE="todofresco-v3";
+var URLS=["/todo_fresco/pide-aqui.html","/todo_fresco/manifest.json"];
 
 self.addEventListener("install",function(e){
+    e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(URLS)}));
     self.skipWaiting();
 });
 
@@ -12,13 +14,5 @@ self.addEventListener("activate",function(e){
 });
 
 self.addEventListener("fetch",function(e){
-    e.respondWith(
-        fetch(e.request).then(function(r){
-            var copy=r.clone();
-            caches.open(CACHE).then(function(c){c.put(e.request,copy)});
-            return r;
-        }).catch(function(){
-            return caches.match(e.request);
-        })
-    );
+    e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request)}));
 });

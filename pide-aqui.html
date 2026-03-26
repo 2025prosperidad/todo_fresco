@@ -61,6 +61,7 @@
         .bar .info{font-size:.9rem;font-weight:600}
         .bar button{background:#fff;color:var(--g);border:none;padding:12px 24px;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;transition:transform .1s}
         .bar button:active{transform:scale(.95)}
+        .bar .clr{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.4);padding:8px 14px;font-size:.78rem;border-radius:10px}
 
         /* BOTTOM SHEET */
         .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .3s;z-index:199}
@@ -88,8 +89,8 @@
         @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
         .card{animation:fadeUp .25s ease-out both}
 
-        @media(min-width:420px){.grid{grid-template-columns:repeat(4,1fr);gap:10px}}
-        @media(min-width:768px){.grid{grid-template-columns:repeat(5,1fr);gap:12px;max-width:800px}.controls{max-width:800px;margin:0 auto}.card .em{font-size:2.6rem}.card .nm{font-size:.85rem}}
+        @media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr);gap:12px;max-width:800px}.controls{max-width:800px;margin:0 auto}.card .em{font-size:2.6rem}.card .nm{font-size:.85rem}}
+        @media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
     </style>
 </head>
 <body>
@@ -113,6 +114,7 @@
 </div>
 
 <div class="bar" id="bar">
+    <button class="clr" onclick="clearCart()">Limpiar</button>
     <div class="info" id="binfo">0 productos</div>
     <button onclick="openSheet()">Pedir por WhatsApp</button>
 </div>
@@ -250,6 +252,12 @@ function setF(c,btn){
     for(var i=0;i<bs.length;i++)bs[i].classList.remove("on");
     btn.classList.add("on");
     render();
+}
+
+function clearCart(){
+    var keys=Object.keys(cart);
+    for(var i=0;i<keys.length;i++)delete cart[keys[i]];
+    render();updBar();
 }
 
 function openSheet(){
